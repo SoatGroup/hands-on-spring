@@ -1,0 +1,15 @@
+
+
+jenkins:
+  url: undefined
+  interval: 10
+
+spring:
+  jackson:
+    default-property-inclusion: non_null
+
+logging:
+  level:
+    'wiremock': warn
+
+

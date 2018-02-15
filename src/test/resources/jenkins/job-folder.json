@@ -1,0 +1,16 @@
+{
+  "jobs": [
+    {
+      "_class": "org.jenkinsci.plugins.workflow.job.WorkflowJob",
+      "name": "job-folder-1",
+      "url": "http://localhost:8089/job/folder/job/job-folder-1/",
+      "color": "blue"
+    },
+    {
+      "_class": "org.jenkinsci.plugins.workflow.job.WorkflowJob",
+      "name": "job-folder-2",
+      "url": "http://localhost:8089/job/folder/job/job-folder-2/",
+      "color": "blue"
+    }
+  ]
+}

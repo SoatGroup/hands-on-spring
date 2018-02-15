@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Jenkins</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/7.0.0/normalize.min.css"
+          integrity="sha256-HxaKz5E/eBbvhGMNwhWRPrAR9i/lG1JeT4mD6hCQ7s4=" crossorigin="anonymous"/>
+    <style>
+        html {font-family: "Open Sans", Helvetica, Arial, sans-serif;background-color: rgb(227, 227, 227);}
+        h2 {text-align: center;}
+        a, a:visited, a:hover, a:focus {text-decoration: none;color: inherit;}
+        svg {margin: 0;font-family: monospace;}
+        #result {line-height: 0.8em;}
+        #loading {width: 100%;max-width: 700px;margin: 0 auto;padding: 0;position: relative;}
+        #loading svg {width: 100%;height: 100%;}
+        #loading .pulsar {stroke-dasharray: 281;-webkit-animation: dash 2.5s infinite linear forwards;animation: dash 2.5s infinite linear forwards;}
+        .job-anime {animation: blinkjob 1s infinite;}
+        @keyframes dash { from {stroke-dashoffset: 814;} to {stroke-dashoffset: -814;} }
+        @keyframes blinkjob { 0% {opacity: 0.5} 50% {opacity: 1} 100% {opacity: 0.5} }
+    </style>
+</head>
+<body>
+<div id="loading">
+    <svg version="1.2" height="300" width="600" xmlns="http://www.w3.org/2000/svg">
+        <path class="pulsar" stroke="rgba(0,155,155,1)" fill="none" stroke-width="1" stroke-linejoin="round"
+              d="M0,90L250,90Q257,60 262,87T267,95 270,88 273,92t6,35 7,-60T290,127 297,107s2,-11 10,-10 1,1 8,-10T319,95c6,4 8,-6 10,-17s2,10 9,11h210">
+        </path>
+        <text text-anchor="middle" alignment-baseline="middle" x="40%" y="75%">Loading ...</text>
+    </svg>
+</div>
+<div id="result"></div>
+<!--Server response will be inserted here-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.11.0/d3.min.js" integrity="sha256-aYYnqVVhAJ4lDammP4Qybmxg3/HVpA7/sNSCntyCyu4="
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"
+        integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<script>
+  function hash(str) {
+    var hash = 0, i, chr;
+    if (str.length === 0) return hash;
+    for (i = 0; i < str.length; i++) {
+      chr = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + chr;
+      hash |= 0;
+    }
+    return hash;
+  }
+
+  var colorMap = {
+    'disabled': 'rgb(166, 166, 166)',
+    'blue': 'rgb(51, 204, 51)',
+    'red': 'rgb(255, 26, 26)',
+    'notbuilt_anime': 'rgb(166, 166, 166)',
+    'red_anime': 'rgb(255, 26, 26)',
+    'blue_anime': 'rgb(51, 204, 51)'
+  };
+
+  var colorFunc = function (d) {
+    return colorMap[d.color] || colorMap['disabled'];
+  };
+
+  $(document).ready(function () {
+
+    var source = new EventSource("/jobs/feed");
+
+    source.onmessage = function (event) {
+
+      d3.select("#loading").remove();
+
+      var job = JSON.parse(event.data);
+      var selector = 'job-' + hash(job.url), color = colorFunc(job);
+      // console.log("Data of job %s (color: %s => %s) : %o", job.name, job.color, color, job);
+
+      var target = job.parent ? '#parent-' + hash(job.parent.name) : '#result';
+
+      if (d3.select('#' + selector).empty()) {
+        if (job.parent) {
+          if (d3.select(target).empty()) {
+            var p = d3.select('#result').append('div');
+            p.append('a')
+              .attr('href', job.parent.url)
+              .append('h2')
+              .text(job.parent.name);
+            p.append('div').attr('id', target.substring(1));
+          }
+        }
+        d3.select(target)
+          .append("svg:svg")
+          .attr("id", selector)
+          .attr("width", (100.0 / 3.0) + '%')
+          .attr("height", 100);
+      }
+
+      var g = d3.select('#' + selector).selectAll('g');
+
+      if(g.size() === 0) {
+        d3.select('#' + selector).selectAll('g').remove();
+        var graph = d3.select('#' + selector).append('g');
+        var rect = graph.append("rect").attr('width', '100%').attr('height', '100%');
+
+
+        graph.append('a')
+          .attr("href", job.url)
+          .append('text')
+          .attr('text-anchor', 'middle')
+          .attr('alignment-baseline', 'central')
+          .attr('x', '50%')
+          .attr('y', '50%')
+          .text(decodeURIComponent(job.name));
+      }
+
+      d3.select('#' + selector).selectAll('rect')
+        .style('fill', color)
+        .classed('job-anime', /.*anime$/.test(job.color));
+      // if () { r.attr('class', 'job-anime'); }
+      // else { }
+
+    };
+  });
+</script>
+</body>
+</html>

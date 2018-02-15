@@ -1,0 +1,27 @@
+{
+  "jobs": [
+    {
+      "_class": "com.cloudbees.hudson.plugins.folder.Folder",
+      "name": "folder",
+      "url": "http://localhost:8089/job/folder/"
+    },
+    {
+      "_class": "org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject",
+      "name": "workflow-multi-branch",
+      "url": "http://localhost:8089/job/workflow-multi-branch/"
+    },
+    {
+      "_class": "org.jenkinsci.plugins.workflow.job.WorkflowJob",
+      "name": "workflow-job",
+      "url": "http://localhost:8089/job/workflow-job/",
+      "color": "blue"
+    },
+    {
+      "_class": "hudson.model.FreeStyleProject",
+      "name": "free-style",
+      "url": "http://localhost:8089/job/free-style/",
+      "color": "blue"
+    }
+
+  ]
+}
