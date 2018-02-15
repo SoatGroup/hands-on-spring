@@ -2,12 +2,13 @@ package fr.soat.spring5.step4;
 
 import fr.soat.spring5.step1.Metrics;
 import fr.soat.spring5.step1.MetricsService;
-import org.reactivestreams.Publisher;
 import org.springframework.boot.actuate.endpoint.annotation.Endpoint;
 import org.springframework.boot.actuate.endpoint.annotation.ReadOperation;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -39,6 +40,8 @@ import java.util.List;
  *
  * @author Soat - 2/12/18.
  */
+@Component
+@Endpoint(id = "proc.stats")
 public class B_ActuatorStatsEndpoint {
 
     private final MetricsService metricsService;
@@ -47,7 +50,10 @@ public class B_ActuatorStatsEndpoint {
         this.metricsService = metricsService;
     }
 
+    @ReadOperation
     public Mono<List<Metrics>> stats() {
-        return Mono.error(new RuntimeException("Retourner un mono des métriques (récupérer à l'aide de metricsService)"));
+        return metricsService.toMetrics()
+                .sort(Comparator.comparing(Metrics::getName))
+                .collect(ArrayList::new, List::add);
     }
 }

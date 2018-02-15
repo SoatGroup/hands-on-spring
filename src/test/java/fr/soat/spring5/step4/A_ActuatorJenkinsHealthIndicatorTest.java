@@ -44,19 +44,19 @@ public class A_ActuatorJenkinsHealthIndicatorTest {
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8089);
 
-//    @Autowired
-//    private A_ActuatorJenkinsHealthIndicator actuatorJenkinsHealthIndicator;
+    @Autowired
+    private A_ActuatorJenkinsHealthIndicator actuatorJenkinsHealthIndicator;
 
     @Test
     public void health_when_down() {
         stubFor(get(urlEqualTo("/")).willReturn(aResponse().withStatus(SERVICE_UNAVAILABLE.value())));
 
         // TODO : Implementer la méthode health
-//        Mono<Health> health = actuatorJenkinsHealthIndicator.health();
-//
-//        StepVerifier.create(health)
-//                .expectNext(Health.down().withDetail("Status", SERVICE_UNAVAILABLE.getReasonPhrase()).build())
-//                .verifyComplete();
+        Mono<Health> health = actuatorJenkinsHealthIndicator.health();
+
+        StepVerifier.create(health)
+                .expectNext(Health.down().withDetail("Status", SERVICE_UNAVAILABLE.getReasonPhrase()).build())
+                .verifyComplete();
 
         verify(getRequestedFor(urlEqualTo("/")));
     }
@@ -66,11 +66,11 @@ public class A_ActuatorJenkinsHealthIndicatorTest {
         stubFor(get(urlEqualTo("/")).willReturn(aResponse().withStatus(OK.value())));
 
         // TODO : Implementer la méthode health
-//        Mono<Health> health = actuatorJenkinsHealthIndicator.health();
-//
-//        StepVerifier.create(health)
-//                .expectNext(Health.up().build())
-//                .verifyComplete();
+        Mono<Health> health = actuatorJenkinsHealthIndicator.health();
+
+        StepVerifier.create(health)
+                .expectNext(Health.up().build())
+                .verifyComplete();
 
         verify(getRequestedFor(urlEqualTo("/")));
     }

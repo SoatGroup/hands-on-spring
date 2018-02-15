@@ -4,10 +4,13 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.reactive.function.client.ClientResponse;
+import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -40,7 +43,9 @@ public class JenkinsJobService {
      * @return une instance de {@link ClientResponse}
      */
     protected static Mono<ClientResponse> jenkinsClient(final String baseUrl) {
-        return Mono.error(new RuntimeException("Utiliser WebClient pour récupérer un répone json (sur /api/json)"));
+        return WebClient.create(baseUrl).get()
+                .uri("/api/json")
+                .exchange();
     }
 
     /**
@@ -53,7 +58,9 @@ public class JenkinsJobService {
      * @return un {@link Flux} de {@link JenkinsJob}
      */
     protected static Flux<JenkinsJob> jobs(final String baseUrl) {
-        return Flux.error(new RuntimeException("A partir de la méthode jenkinsClient, transformer cela en un flux de JenkinsJob"));
+        return jenkinsClient(baseUrl)
+                .flatMap(r -> r.bodyToMono(JenkinsApi.class))
+                .flatMapIterable(JenkinsApi::getJobs);
     }
 
     /**
@@ -81,8 +88,9 @@ public class JenkinsJobService {
      * @return un {@link Flux} de {@link JenkinsJob}
      */
     protected static Flux<JenkinsJob> deepJobs(String baseUrl) {
-        return Flux.error(new RuntimeException("A partir des méthodes jobs et isParent, récupérer l'ensemble des jobs" +
-                " (qui ne sont pas des parents)"));
+        return jobs(baseUrl)
+                .flatMap(i -> isParent(i) ? deepJobs(i.getUrl()).doOnNext(j -> j.setParent(i)) : Flux.just(i))
+                .sort(Comparator.comparing(JenkinsJob::getName));
     }
 
     /**
@@ -94,8 +102,7 @@ public class JenkinsJobService {
      */
     @GetMapping(value = "/jobs/feed", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<JenkinsJob> jobStatus() {
-        return Flux.error(new RuntimeException("A partir de la méthode deepJobs, récupérer toutes les 10 secondes " +
-                "l'ensemble de vos jobs"));
+        return Flux.interval(Duration.ZERO, Duration.ofSeconds(10)).flatMap(i -> deepJobs(properties.getUrl())).share();
     }
 
 }

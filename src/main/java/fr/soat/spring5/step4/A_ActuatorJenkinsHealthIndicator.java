@@ -23,7 +23,8 @@ import static org.springframework.http.HttpStatus.OK;
  *
  * @author Soat - 2/11/18.
  */
-public class A_ActuatorJenkinsHealthIndicator {
+@Component
+public class A_ActuatorJenkinsHealthIndicator implements ReactiveHealthIndicator  {
 
     private final JenkinsProperties jenkinsProperties;
 
@@ -31,4 +32,11 @@ public class A_ActuatorJenkinsHealthIndicator {
         this.jenkinsProperties = jenkinsProperties;
     }
 
+    @Override
+    public Mono<Health> health() {
+        return WebClient.create(jenkinsProperties.getUrl()).get()
+                .exchange()
+                .map(ClientResponse::statusCode)
+                .map(c -> c == OK ? Health.up().build() : Health.down().withDetail("Status", c.getReasonPhrase()).build());
+    }
 }
