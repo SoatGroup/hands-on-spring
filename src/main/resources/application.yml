@@ -1,0 +1,10 @@
+jenkins:
+  url: https://jenkins-solidays-tooling.ct.aws.soat.fr
+  interval: 10
+
+
+spring:
+  jackson:
+    default-property-inclusion: non_null
+
+

@@ -1,0 +1,16 @@
+{
+  "jobs": [
+    {
+      "_class": "org.jenkinsci.plugins.workflow.job.WorkflowJob",
+      "name": "job-multibranch-1",
+      "url": "http://localhost:8089/job/workflow-multi-branch/job/job-multibranch-1/",
+      "color": "blue"
+    },
+    {
+      "_class": "org.jenkinsci.plugins.workflow.job.WorkflowJob",
+      "name": "job-multibranch-2",
+      "url": "http://localhost:8089/job/workflow-multi-branch/job/job-multibranch-2/",
+      "color": "blue"
+    }
+  ]
+}
